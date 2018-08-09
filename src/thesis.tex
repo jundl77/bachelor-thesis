@@ -1,0 +1,165 @@
+% Use UTF-8 encoding!!
+% (c) Stefan Ulbrich, 2012
+
+% updated in May, 2015 by Michael Bechtel
+
+\documentclass[english, ngerman]{KITreprt}
+\usepackage{subfiles}
+\usepackage{natbib}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{rotating}
+
+%% --------------------------------
+%% Obligatory Parameters:
+%% --------------------------------
+
+\renewcommand{\mythesis}{\bachelorsthesis}
+\renewcommand{\mytitle}{Keyword Based Document Retrieval via Document Embeddings}
+\renewcommand{\myname}{Julian Brendl}
+\renewcommand{\myshorttitle}{}
+\cfoot{\mytitle}
+
+\renewcommand{\timestart}{Febuary 16\textsuperscript{th} 2018}
+\renewcommand{\timeend}{June 15\textsuperscript{th} 2018}
+\newcommand{\referee}{Prof. Dr. Alexander Waibel}
+\newcommand{\refereetwo}{Prof. Dr. Tamim Asfour}
+%\newcommand{\refereethree}{Drittgutachter}
+
+\newcommand{\advisor}{Dr. Sebastian Stüker}
+%\newcommand{\advisortwo}{Betreuender Mitarbeiter 2}
+%\newcommand{\advisorthree}{Betreuender Mitarbeiter 3}
+
+\graphicspath{{./img/}}
+%\addbibresource{citations.bib}
+
+
+%% -------------------------------
+%% |  Information for PDF file   |
+%% -------------------------------
+\hypersetup{
+	pdfauthor={\myname},
+	pdftitle={\mytitle},
+	pdfsubject={Not set},
+	pdfkeywords={Not set}
+}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+
+\begin{document}
+
+\selectlanguage{english}
+
+\maketitle
+
+\thispagestyle{empty}
+\newpage
+%\topskip0pt
+\vspace*{\fill}
+\noindent
+\textbf{Erkl\"arung:}\\
+\\
+\noindent
+Ich versichere hiermit, dass ich die Arbeit selbstst\"andig verfasst habe, keine anderen als die angegebenen Quellen und Hilfsmittel benutzt habe, die w\"ortlich oder inhaltlich \"ubernommenen
+Stellen als solche kenntlich gemacht habe und die Satzung des Karlsruher Instituts f\"ur Technologie zur Sicherung guter wissenschaftlicher Praxis beachtet habe.\\
+\\
+\\
+\noindent
+Karlsruhe, den 15. Juni 2018
+\begin{flushright}
+
+\myname
+\end{flushright}
+
+\vspace*{\fill}
+\cleardoublepage
+
+
+
+\thispagestyle{empty}
+\newpage
+%\topskip0pt
+\vspace*{\fill}
+\noindent
+\textbf{Abstract:}\\
+\\
+\noindent
+Many different kinds of document retrieval systems exist today using various approaches. Many rely on simple frequency
+statistics while others utilize neural networks to retrieve documents. In this thesis I present a document retrieval system called
+word2doc. Its purpose is to gain a semantic understanding of the query and indexed documents in order to improve retrieval
+results. In contrast to most existing retrievers, word2doc learns semantic meaning by combining several existing approaches
+to train its own document embeddings. The few retrievers that make use of document embeddings do not learn the embeddings
+themselves. I hypothesize that by training document embeddings myself, embeddings can be tuned to the query and to other
+contextually similar documents such that they aid in document retrieval. Furthermore, if document embeddings are trained in a similar
+fashion as word embeddings are, perhaps the success of word embeddings can be transferred to the document retrieval task. Having
+put forth this hypothesis, I tested it by implementing my ideas in word2doc and comparing results with a frequency-based document
+retriever developed by Facebook \citep{drqa}. In this thesis, both systems operate on the Wikipedia corpus. However word2doc was only
+trained on 1\% of the full corpus. Yet results are promising, showing that word2doc outperforms Facebook's system when it
+comes to pure retrieval accuracies. However, word2doc is struggling with the retrieval of ranked document sets. While word2doc
+is adequate at identifying the target document, it is unable to retrieve document sets that are relevant to the target document.
+My two main explanations for this are as follows: Word2doc was only trained on 1\% of the full Wikipedia corpus, whereas Facebook's
+system had the entire corpus at its disposal. Thus, word2doc had fewer relevant documents that could be retrieved. Furthermore,
+word2doc optimizes on accuracies and not on the ranking quality of a retrieved document set. Hence, it is possible that
+logits in the final softmax layer do not reflect a ranking and only reflect the single best document.
+
+In conclusion, word2doc shows that document retrieval via document embeddings has potential. In order to fully test the
+performance, however, word2doc has to be trained on the entire Wikipedia corpus and not just on 1\%.
+
+\vspace*{\fill}
+\cleardoublepage
+
+
+\thispagestyle{empty}
+\newpage
+%\topskip0pt
+\vspace*{\fill}
+\noindent
+\textbf{Kurzzusammenfassung:}\\
+\\
+\noindent
+Es gibt heute viele verschiedene Arten von Dokumentenabrufsystemen mit unterschiedlichen Ansätzen. Viele verlassen
+sich auf einfache Frequenzstatistiken, andere nutzen neuronale Netze, um Dokumente abzurufen. In dieser Arbeit stelle
+ich ein Dokumentenabrufsystem namens word2doc vor. Ziel ist es, ein semantisches Verständnis der Abfrage und der
+indizierten Dokumente zu gewinnen, um die Suchergebnisse zu verbessern. Im Gegensatz zu den meisten existierenden
+Retrievern lernt word2doc die semantische Bedeutung, indem es mehrere existierende Ansätze kombiniert, um seine
+eigenen Dokumenteneinbettungen zu trainieren. Die wenigen Retriever, die Dokumenteneinbettungen verwenden, lernen die
+Einbettungen nicht selbst. Ich habe die Hypothese aufgestellt, dass durch das eigene Trainieren von
+Dokumenteneinbettungen die Einbettungen auf die Abfrage und auf andere kontextuell ähnliche Dokumente angepasst werden
+können, so dass sie bei der Dokumentensuche helfen. Wenn die Dokumenteneinbettungen in ähnlicher Weise trainiert werden
+wie die Wörtereinbettungen, kann der Erfolg der Wörtereinbettungen vielleicht auf die Aufgabe der Dokumentensuche
+übertragen werden. Ich testete meine Hypothese, indem ich meine Ideen in word2doc umsetzte und die Ergebnisse mit
+einem von Facebook entwickelten frequenzbasierten Dokument-Retriever verglich. In dieser Arbeit verwenden beide Systeme
+den Wikipedia-Korpus. Allerdings wurde word2doc nur auf 1\% des gesamten Korpus trainiert. Doch die Ergebnisse sind
+vielversprechend und zeigen, dass word2doc das System von Facebook übertrifft, wenn es um reine Suchgenauigkeit geht.
+Word2doc kämpft jedoch mit dem Auffinden von geordneten Dokumentensätzen. Während word2doc für die Identifizierung des
+Zieldokuments adequat ist, ist es nicht in der Lage, andere für das Zieldokument relevante Dokumente abzurufen. Meine
+beiden Hauptgründe dafür sind folgende: Word2doc wurde nur auf 1\% des gesamten Wikipedia-Corpus trainiert, während das
+System von Facebook über den gesamten Corpus verfügte. So hatte word2doc weniger relevante Dokumente, die abgerufen
+werden konnten. Darüber hinaus optimiert word2doc die Genauigkeit und nicht die Rankingqualität eines abgerufenen
+Dokumentsatzes. Daher ist es möglich, dass die Logits in der letzten Softmax-Ebene kein Ranking, sondern nur das beste
+Dokument wiedergeben.
+
+Zusammenfassend zeigt word2doc, dass der Abruf von Dokumenten über Dokumenteneinbettungen Potenzial hat. Um die
+Leistung vollständig zu testen, muss word2doc jedoch auf dem gesamten Wikipedia-Corpus und nicht nur auf 1\%
+trainiert werden.
+\vspace*{\fill}
+\cleardoublepage
+
+% Set up document
+\tableofcontents
+\setcounter{page}{1}
+
+\subfile{introduction/intro}
+\subfile{theory/theory}
+\subfile{data/data}
+\subfile{experiments/experiments}
+\subfile{results/results}
+\subfile{conclusion/conclusion}
+
+\bibliographystyle{unsrtnat}
+
+\bibliography{citations.bib}
+
+\end{document}

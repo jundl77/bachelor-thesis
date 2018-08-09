@@ -1,0 +1,53 @@
+\chapter{Conclusion}
+\label{conclusion}
+
+In this thesis I present an information retrieval system called word2doc that makes use of document embeddings as well as query
+embeddings and a frequency based document retriever to retrieve documents. While each of these approaches have been explored
+individually, word2doc is to my knowledge the first system to combine these different methods and, in doing so, intrinsically
+train document embeddings to retrieve documents. With word2doc I try to build an information retrieval system that is able to
+gain a semantic understanding of documents, and thus retrieve documents not based on pure statistics but based on semantic
+meaning instead. Word2doc should understand the content of the query and the document, as far as that is possible.
+
+The results show that word2doc's approach has potential, outscoring Facebook's document retriever from \textit{DrQA} \citep{drqa}
+when looking at accuracies. The authors of \citet{drqa} claim that their document retriever outscores the Wikipedia search,
+thus word2doc should do
+so as well in terms of accuracies. However, word2doc is unable to retrieve a ranked list of relevant documents pertaining to a
+query (see section \ref{results:map}), and thus it is unfit to work as a full document retrieval system at the present time. There
+is an easy explanation to this lack of performance however. Word2doc was only trained on 1\% of the entire Wikipedia corpus, whereas
+the document retriever had the entire Wikipedia corpus at its disposal. I imagine performance would significantly improve if
+word2doc is trained on the entire Wikipedia corpus as well. While this fact has, without doubt, a big impact on performance, another
+issue could be that word2doc was built to optimize accuracy, and accuracy does not take into account the ranking within a set
+of retrieved results. Better results could likely be achieved, if word2doc optimizes on a metric that takes the ranking of the top ten
+documents into account instead of just the top one.
+
+It should also be noted that information retrieval is a very subjective task. Different people have different opinions on which
+retrieved documents count as relevant. In fact, they might not even know which documents they are looking for, given their query.
+Word2doc was exclusively trained on queries that are based on Wikipedia titles, which could be interpreted as a weakness. It is
+possible that queries arise that are very far from any seen Wikipedia titles. However, to counter that (and for other reasons),
+I performed data augmentation as presented in section \ref{data:overfitting}, which exposes the network to a range of different
+queries.
+
+In conclusion, the approach taken by word2doc seems promising. The neural network was able to take the information it
+was given and retrieve the correctly labeled document to a certain degree. Additionally, the network was able to train document
+embeddings, showing that the network is generalizing and grouping documents by their semantic relevance. With a little bit of
+tweaking, I am confident that competitive results can be achieved.
+
+
+\section{Future Work}
+
+In a first step, future work should focus on training and evaluating word2doc on the entire Wikipedia corpus. All 600 GB of
+pre-trained data has already been computed, it only needs to be trained. There is a risk that the system does not scale to the
+entire Wikipedia dataset. In that case, an alternative option could be to train multiple different models, one for each topic in
+Wikipedia. The Wikipedia corpus could be split into topic-based models using paragraph vectors \citep{doc2vec}, which has
+shown success on that task. Using sentence embeddings the topic of the query could then be determined and matched with the relevant
+word2doc model. Of course, better accuracies are probably obtained when finding a way to use the entire Wikipedia corpus.
+
+Furthermore, a different optimizing metric than accuracy should be explored for the reasons mentioned above. Another angle of
+attack could be to look into a different negative sampling technique proposed by \citet{ai2016} specifically for paragraph vectors
+\citep{doc2vec} in IR systems. Unfortunately, I discovered their work only after I had completed mine, and was thus unable to incorporate it
+into my own.
+
+Word2doc has three main components, the document retriever, InferSent and the neural network. Simplifying this pipeline and combining
+all of these components into one could be another source of improvement.
+
+

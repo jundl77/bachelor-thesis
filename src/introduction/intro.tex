@@ -1,0 +1,128 @@
+\chapter{Introduction}
+
+Free text documents, that is, documents comprised of unstructured text like it can be found in this thesis, make up a bulk
+of modern day information in the form of papers, articles and other documents. The utility of such documents is self-evident, and
+there are millions of them in existence. The question arises of how to quickly and accurately access these documents, and for this
+purpose document retrieval systems exist.
+
+Document retrieval systems, or information retrieval (IR) systems, offer the ability to find free-text documents, given some user query.
+This query can be in the form of a keyword, or a phrase and usually describes what is being searched for, think of a Google search
+query. In fact Google's famous Page-Rank algorithm is a great example of such a document retrieval system for websites.
+
+The aim of the thesis is to present word2doc, an ad-hoc document retrieval system to be used by the Lecture Translator
+\citep{mller2016} that is being developed by the Interactive Systems Lab at the KIT, along with a working implementation.
+This is motivated through the following use-case in the Lecture Translator: The overarching idea is to automatically highlight
+important keywords and phrases in the generated translations of the lecture translator, and to link these keywords and phrases to
+the document best describing the keyword or phrase. Thus, a need arises to provide relevant documents for highlighted keywords within
+the text. An implementation for word2doc can be found here: \url{https://github.com/jundl77/word2doc}.
+
+Many different kinds of document retrieval systems exist already, with many different approaches. Many rely on simple frequency
+statistics while others use neural networks. However, word2doc gains a semantic understanding of the query and the
+document, and retrieves documents that contextually match the query. This too has been done to a certain degree, however most
+approaches only use neural nets to pre-process certain components, and retrieve results using these pre-calculated
+components. Word2doc intrinsically learns the semantic relations between documents, and it is, to my knowledge, the first system to
+do so.
+
+Word2doc uses a word frequency pre-filtering followed by a document-embedding based neural network. Using a frequency based
+document retrieval system developed by Facebook \citep{drqa} as a baseline, I show that this setup has potential. It outscores
+Facebook's system when it comes to measuring accuracies on the documents to retrieve. However, it falls short when it comes to
+measuring the quality of a retrieved ranked document set. There are two plausible explanations for this shortfall that I will
+discuss in chapter \ref{conclusion}.
+
+In the remaining chapter I cover related works and compare word2doc to what has previously been done. I explain what word2doc does
+differently, and where it improves upon other systems. In chapter \ref{theory} I discuss the theoretical foundations of word2doc, and
+explain word2doc's architecture in detail. Chapter \ref{sec:data} covers various datasets I used, including the training and evaluation
+datasets. Chapter \ref{exp} presents the evaluation techniques I use to measure word2doc's performance, as well as giving some
+implementation details and backing up several design decisions with empirical data. In chapter \ref{results} I will present my final
+results, and in chapter \ref{conclusion} I will summarize and explore opportunities for future work.
+
+
+\section{Related Work}
+
+Word2doc falls into the category of ad-hoc information retrieval systems. Ad-hoc information retrieval systems are given a query and
+have to quickly and spontaneously choose one (or a few) documents out of a huge collection of documents. In word2doc's case this
+is the entire Wikipedia corpus. A common example of an ad-hoc information retrieval system would be any web search engine.
+
+Many different approaches exist that perform information retrieval. Classic approaches use statistical methods to determine the best
+match, but given the recent success of word embeddings, there are more and more systems that turn to neural networks and embeddings
+to determine the result of a query. I will first present a few traditional approach to IR, and then delve into more relevant systems
+that use embeddings.
+
+
+\subsection{Statistical IR Systems}
+
+The most basic approach involves an inverted lookup index, like it is used in elastic search \citep{elasticsearch}. Elastic
+search is a common search engine used for example by Wikipedia or GitHub, and an inverted lookup index is a data structure that allows
+for very fast full-text searches. An inverted index consists of a list of all unique words that appear in any document, and for
+each word, a list of the documents in which it appears. It provides a fast way to find documents that contain words from the query.
+
+Like elastic search, Facebook's document retriever from DrQA \citep{drqa} also uses an inverted index. However, it improves on elastic
+search by additionally using ngrams and a hash function to more precisely index documents as well as the query. This is explained in
+detail in section \ref{theory:docret}. I use Facebook's document retriever as a baseline to measure wor2doc's performance.
+
+Furthermore, Ponte \& Croft propose QLM (Query Likelihood Model) \citep{qlm} in which a language model of each document is estimated.
+Each document is then ranked by the likelihood of the query matching it, according to the estimated language model. Robertson \&
+Zaragoza present BM25 \citep{bm25}, a ranking function based on the probabilistic relevance model \citep{prob-relevance-model}. It uses
+TF-IDF to rank matching documents by their relevance for a query. Metzler \& Croft propose a linear model \citep{metzler2005} that
+takes proximity between query terms into account through Markov random fields. Lavrenko in \citet{lavrenko2001} and
+\citet{lavrenko2004} proposes a pseudo relevance feedback (PRF) based method that performs well at the cost of executing two rounds of
+retrieval, instead of one. Terms from the ranked documents retrieved in round one are used to augment the query for round two. The
+ranked set from the second round is then presented to the user.
+
+There are many more statistical approaches, notably Latent Semantic Indexing \citep{lsi}, Probabilistic Latent Semantic Indexing
+\citep{plsi} and Latent Dirichlet Allocation \citep{lda} that utilize global statistical information of the corpus to calculate a
+ranking for a query. On the other hand, embedding techniques such as word2vec \citep{word2vec} or doc2vec \citep{doc2vec} focus
+on local context information instead, which I talk about next.
+
+
+\subsection{IR Systems using Embeddings}
+
+There have been multiple works that use embeddings to improve the performance for IR systems in recent years, mainly due to the
+big success of word2vec \citep{word2vec} in NLP. In general, these works can be roughly divided into the following two categories.
+
+Models in the first category reformulate the query using embeddings so that the query more accurately reflect a user’s intent and thus
+yields better results. For example, \citet{grbovic2015} map queries into an embeddings space and expand a given query with the K-nearest
+neighbors in the embedding space to augment the original query. \citet{roy2016} also use word embeddings and the K-nearest neighbor
+algorithm to obtain expansion words for the query. \citet{kuzi2016} expand the query by adding terms from the corpus that are
+semantically connected to the query. They do this by computing cosine similarities between embeddings of terms occurring in the
+query and embeddings of terms that surround the original term in the corpus, similar to word2vec's Continuous Bag-of-Words (CBOW)
+model \citep{word2vec}. \citet{zheng2015} propose a framework to learn weights for individual terms occuring in the query.
+Weighting terms allows different words in the query to be differently emphasized. \citet{zamani2016} create two query expansion methods to
+estimate query language models based on word embeddings and an embedding-based relevance model. The relevance model was developed by
+\citet{lavrenko2001} and it is a statistical model used to capture the contextual relevance of documents in the context of IR.
+\citet{roy2016b} use kernel density estimation on the embedding space created by term embeddings to calculate a relevance model.
+\citet{zamani2016b} estimate embedding vectors for queries based on the individual embeddings of terms occurring in the
+query, something word2doc does as well. \citet{diaz2016} explore the difference between global embeddings and corpus and query
+specific embeddings, applied to query expansion. Their results suggest that global embeddings the likes of GloVe vectors
+\citep{glove} are underperformed by locally trained embeddings.
+
+Models in the second category try to exploit semantic similarities between terms, queries and documents.
+Word2doc falls into this category. For example, \citet{clinchant2013} propose a document representation in which they
+non-linearly map word embeddings of words occurring in a document into a higher-dimensional space and then aggregate them into
+a document-level representation. \citet{ganguly2015} construct a generalized language model, where the mutual independence between
+a pair of words no longer holds. Instead, they use word embeddings to derive the transformation probabilities between words. Their
+experimental results on TREC 6-8 ad hoc and Robust tasks show that their model significantly outperforms the standard language
+model and LDA-smoothed language model baselines. \citet{zuccon2015} propose a translation language model that captures semantic
+relations between words in queries and those in relevant documents by using word embeddings within the well-known translation
+language model. A bit differently from these works, \citet{mitra2016} present a documents ranking model named DESM in which a
+query document relevance score is computed by aggregating the cosine similarities across all the query-document word pairs.
+
+There are also some models that use deep neural nets like MLPs or CNNs to directly learn embeddings for queries and documents
+themselves, however they use user generated data like click-through data. Microsoft's DSSM \citep{huang2013} or Microsoft's
+CLSM \citep{shen2014} are examples of those.
+
+Word2doc combines these approaches. It performs two rounds of retrieval and augments the second round with information from the
+first round, similar to Lavrenko. The first round of retrieval is done through Facebook's document retriever, a purely statistical
+approach, while the second round is performed through a deep neural network. Furthermore, it reformulates the query for the
+second retrieval round by creating an embedding for it, and ultimately creates its own document embedding scheme to model
+semantic relations between documents and documents, and between documents and queries. It does this through the use of a deep
+neural net without the use of user generated data like DSSM or CLSM, and it is, to my knowledge, the first system to do so.
+
+\begin{minipage}{\textwidth}
+There are some other approaches that do not fall into the two categories above. Namely, \cite{guo2017} who claims that a
+query-document match is not necessarily defined through semantic similarity, but more through relevance. They go on to
+present a deep relevance matching model (DRMM) for ad-hoc retrieval. The list of studies mentioned in this section is
+non-exhaustive. For a more detailed overview look at \citet{mitra2017}.
+\end{minipage}
+
+\clearpage
